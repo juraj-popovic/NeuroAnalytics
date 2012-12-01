@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="C:/projects/NeuroAnalytics/neuroph-2.7/neuroph-core-2.7.jar"/>
+	<classpathentry kind="lib" path="C:/projects/NeuroAnalytics/neuroph-2.7/neuroph-imgrec-2.7.jar"/>
+	<classpathentry kind="lib" path="C:/projects/NeuroAnalytics/neuroph-2.7/neuroph-ocr-2.7.jar"/>
+	<classpathentry kind="lib" path="C:/projects/NeuroAnalytics/neuroph-2.7/neuroph-samples-2.7.jar"/>
+	<classpathentry kind="lib" path="C:/projects/NeuroAnalytics/jargs-2.0-SNAPSHOT.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
