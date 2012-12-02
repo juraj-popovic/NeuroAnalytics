@@ -26,7 +26,7 @@ public class BrainFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public Brain createFromTrainSet(String path, boolean verbose, Integer hidden)
+	public Brain createFromTrainSet(String path, boolean verbose, Integer hidden, double learnrate)
 			throws Exception {
 		// The trainings data
 		System.out.println("Going to train with neurons:"+hidden.toString()+
@@ -84,7 +84,7 @@ public class BrainFactory {
 
 		// specify learningrull
 		MomentumBackpropagation backpropagation = new MomentumBackpropagation();
-		backpropagation.setLearningRate(0.1);
+		backpropagation.setLearningRate(learnrate);
 		backpropagation.setMaxError(0.01);
 		backpropagation.setMomentum(0.0);
 

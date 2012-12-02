@@ -51,10 +51,7 @@ public class Brain {
 		network.save(storePath);
 	}
 
-	public double evaluateAccuracyForNumber(HashMap<String, Double> result, String wanted) {
-		return result.get(wanted);
-	}
-
+	/*
 	public void interprete(HashMap<String, Double> result, boolean verbose) {
 
 		ValueComparator bvc = new ValueComparator(result);
@@ -86,25 +83,5 @@ public class Brain {
 			System.out.println("something else …");
 		}
 	}
-
-	class ValueComparator implements Comparator<String> {
-
-		Map<String, Double> base;
-
-		public ValueComparator(Map<String, Double> base) {
-			this.base = base;
-		}
-
-		// Note: this comparator imposes orderings that are inconsistent with
-		// equals.
-		public int compare(String a, String b) {
-			if (base.get(a) > base.get(b)) {
-				return -1;
-			} else if (base.get(a) < base.get(b)) {
-				return 1;
-			} else {
-				return 0;
-			}
-		}
-	}
+	*/
 }
