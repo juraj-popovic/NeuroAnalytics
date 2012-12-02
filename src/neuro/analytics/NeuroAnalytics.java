@@ -14,72 +14,52 @@ import com.sanityinc.jargs.CmdLineParser.Option;
 
 public class NeuroAnalytics {
 
-
-	private String mode = null;
-	private String storePath = null;
 	private String loadPath = null;
-	private String filePath = null;
 	private boolean verbose = false;
 	private Brain curBrain = null;
 	enum evalMode {simple, firstmatch, relative};
 
-	/*
-	public static void oldmain(String[] args) throws Exception {
-
-		CmdLineParser cmd = new CmdLineParser();
-		Option<String> modeOption = cmd.addStringOption('m', "mode");
-		Option<String> loadPathOption = cmd.addStringOption('l', "loadPath");
-		Option<String> storePathOption = cmd.addStringOption('s', "storePath");
-		Option<String> filePathOption = cmd.addStringOption('f', "filePath");
-		Option<Boolean> verboseOption = cmd.addBooleanOption('v', "verbose");
-		Option<Integer> hiddenOption = cmd.addIntegerOption('h', "hidden");
-		cmd.parse(args);
-
-		String mode = cmd.getOptionValue(modeOption, "tell");
-		String loadPath = cmd.getOptionValue(loadPathOption);
-		String storePath = cmd.getOptionValue(storePathOption);
-		String filePath = cmd.getOptionValue(filePathOption);
-		Integer hidden = cmd.getOptionValue(hiddenOption);
-		boolean verbose = cmd.getOptionValue(verboseOption, false);
-
-		NeuroAnalytics app = new NeuroAnalytics(mode, loadPath, storePath, filePath,
-				verbose, hidden);
-		app.run();
-	}
-	*/
-
 	public static void main(String[] args) throws Exception {
+		// parse arguments
 		CmdLineParser cmd = new CmdLineParser();
 		Option<String> paramOption = cmd.addStringOption('p', "param");
 		Option<Double> lowOption = cmd.addDoubleOption('l', "low");
 		Option<Double> highOption = cmd.addDoubleOption('h', "high");
 		Option<Double> stepOption = cmd.addDoubleOption('s', "step");
 		cmd.parse(args);
+		// set the parameters
 		final Double  low = cmd.getOptionValue(lowOption);
 		final Double high = cmd.getOptionValue(highOption);
 		final Double step = cmd.getOptionValue(stepOption);
 		String param = cmd.getOptionValue(paramOption);
+		// verify if everything necessary is provided
 		if (param==null || high == null || low == null || step==null) {
 			System.out.println("Specify all params! -l(num) - h(num) -s(num) -p('hidden'|'lrate')");
 			return;
 		}
+		// the next is the general variable going from low to high in a cycle
 		Double next = low;
-		// defaults, the parameter examined will be changed
-		// from low to high by step
+		// defaults for the parameters which are not going to be changed
 		Integer hidden = 50;
 		double learnrate = 0.1;
 		System.out.println("Entering analytics! Going to manipulare param "+param+"within bounds"
 				+low.toString()+" to "+high.toString()+" by "+step.toString());
-		NeuroAnalytics instance = new NeuroAnalytics(null, "Trainset", null, null,false);
+		// instantiate, there will be just 1 instance and curBrain will
+		// be overwritten each time; Constructor needs the path to training set
+		NeuroAnalytics instance = new NeuroAnalytics("Trainset",false);
+		// cycle for the parameter examined
 		while ( next <= high) {
 			System.out.println("\nGoing to make new brain with param "+param+": "+next.toString());
+			// depending on -p option either hidden or learning rate are changed
 			if (param.compareTo("hidden")== 0) {
 				hidden = next.intValue();
 			}
 			else if (param.compareTo("lrate")== 0) {
 				learnrate = next;
 			}
+			// make a new brain with this new value of a parameter
 			instance.curBrain = instance.trainAndReady(hidden, learnrate);
+			// evaluate the different accuracies on this brain
 			double simAccuracy = instance.evaluateAccuracy(evalMode.simple);
 			System.out.println("For param "+param+":"+next.toString()+" is simple accuracy: "+simAccuracy);
 			double fmAccuracy = instance.evaluateAccuracy(evalMode.firstmatch);
@@ -90,8 +70,10 @@ public class NeuroAnalytics {
 			}
 	}
 
+	// to evaluate accuracy(predition capability) of the network by given eval.method
 	public double evaluateAccuracy(evalMode howEval) throws Exception {
 		double forall = 0;
+		// the overall accuracy is the sum of accuracies for each possible number
 		for(Integer number = 0; number<=9; number++) {
 			if (verbose) System.out.println("\nGoing to guess:"+number.toString());
 			double acc = 0;
@@ -106,7 +88,9 @@ public class NeuroAnalytics {
 		}
 		return forall;
 	}
+
 	/*
+	// used for testing accuracy evalution methods
     static void testAccuracy() {
 		HashMap<String, Double> res = new HashMap<String, Double>();
 		res.put("1", 0.89);
@@ -121,10 +105,16 @@ public class NeuroAnalytics {
 	}
 	*/
 
+	// simple accuracy, just give the calculated probability for the right number
 	public Double evaluateSimpleAccuracy(HashMap<String, Double> result, String wanted) {
 		return result.get(wanted);
 	}
 
+	// relative accuracy taking into account also the probabilities of another
+	// numbers. Returns the difference between the probability of the right number
+	// and the probability of the highest not right number. Might me negative.
+	// Idea behind: if I have a good brain, for a certain number it should give
+	// back high probability, but for the others small one! More on the logic in readme.
 	public Double evaluateRelativeAccuracy(HashMap<String, Double> result, String wanted) {
 		ValueComparator bvc = new ValueComparator(result);
 		TreeMap<String, Double> sortedResult = new TreeMap<String, Double>(bvc);
@@ -143,6 +133,7 @@ public class NeuroAnalytics {
 		return properHit.getValue() - bestWrongHit.getValue();
 	}
 
+	// first match accuracy, 1 if the right number has highest probability, else 0
 	public Double evaluateFMAccuracy(HashMap<String, Double> result, String wanted) {
 		ValueComparator bvc = new ValueComparator(result);
 		TreeMap<String, Double> sortedResult = new TreeMap<String, Double>(bvc);
@@ -153,94 +144,25 @@ public class NeuroAnalytics {
 		return 0.0;
 	}
 
+	// get a file path for a number, must be in Evalset folder, ending with _1, format png
 	private static String tellFileName(Integer num){
 		return "Evalset/"+num.toString()+"_1.png";
 	}
 
-	public NeuroAnalytics(String mode, String loadPath, String storePath,
-			String filePath, boolean verbose) {
-		this.mode = mode;
-		this.loadPath = loadPath;
-		this.storePath = storePath;
-		this.filePath = filePath;
+	// constructor
+	public NeuroAnalytics(String loadpath, boolean verbose) {
+		this.loadPath = loadpath;
 		this.verbose = verbose;
 	}
 
-	/*
-	public void run() throws Exception {
-
-		if (mode.compareTo("learn") == 0) {
-			System.out.println("Start programm in learn mode.");
-
-			if (loadPath == null || storePath == null) {
-				System.out.println("Please specify a directory with images '--loadPath' and a place where to store the network '--filePath'.");
-				return;
-			}
-
-			if (hidden == null)	{
-				System.out.println("Please specify number of hidden neurons");
-				return;
-			}
-
-			if (verbose) {
-				System.out.println("Learning from: " + loadPath + ".");
-				System.out.println("And later storring the results at: "
-						+ storePath + ".");
-			}
-			trainAndSleep();
-		} else if (mode.compareTo("tell") == 0) {
-			System.out.println("Start programm in tell mode.");
-
-			if (loadPath == null || filePath == null) {
-				System.out.println("Please specify a network '--loadPath' and an imageFile '--filePath'.");
-				return;
-			}
-
-			if (verbose) {
-				System.out.println("Loading the network from: " + loadPath
-						+ ".");
-				System.out
-						.println("And trying to recognice: " + filePath + ".");
-			}
-			ask();
-		} else {
-			System.out.println("I don't know, what you mean with '" + mode
-					+ "' and my brain can't help me!");
-		}
-
-		System.out.println("Done.");
-	}
-	*/
-
-	/*
-	private void trainAndSleep() throws Exception {
-		System.out.println("Create a new brain and train it ...");
-		BrainFactory factory = new BrainFactory();
-		Brain brain = factory.createFromTrainSet(loadPath, verbose, hidden);
-
-		System.out.println("Putting the brain to sleep.");
-		brain.sleepAt(storePath, verbose);
-	}
-	*/
-
-
+	// create a new Brain and train it based on testset on loadpath(is hardcoded to 'Trainset' now.
 	private Brain trainAndReady(Integer hidden, double learnrate) throws Exception {
 		System.out.println("Create a new brain and train it ...");
 		BrainFactory factory = new BrainFactory();
 		return factory.createFromTrainSet(loadPath, verbose, hidden, learnrate);
 	}
 
-	/*
-	private void ask() throws Exception {
-		System.out.println("Wakeing up the brain ...");
-		BrainFactory factory = new BrainFactory();
-		Brain brain = factory.createFromFile(loadPath, verbose);
-
-		HashMap<String, Double> result = brain.ask(filePath, verbose);
-		brain.interprete(result, verbose);
-	}
-	*/
-
+	// used to be able to sort results of the ask function.
 	static class ValueComparator implements Comparator<String> {
 
 		Map<String, Double> base;

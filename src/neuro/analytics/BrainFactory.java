@@ -42,7 +42,7 @@ public class BrainFactory {
 		Dimension dimension = new Dimension(30, 30);
 		ColorMode colorMode = ColorMode.BLACK_AND_WHITE;
 		List<Integer> hiddenLayers = new ArrayList<Integer>();
-		// hiddenLayers.add(50);
+		// this is the parametrizable value
 		hiddenLayers.add(hidden);
 
 		// TODO load files from path
@@ -84,6 +84,7 @@ public class BrainFactory {
 
 		// specify learningrull
 		MomentumBackpropagation backpropagation = new MomentumBackpropagation();
+		// this is parametrizable
 		backpropagation.setLearningRate(learnrate);
 		backpropagation.setMaxError(0.01);
 		backpropagation.setMomentum(0.0);

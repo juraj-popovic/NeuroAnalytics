@@ -2,11 +2,7 @@ package neuro.analytics;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import org.neuroph.imgrec.ImageRecognitionPlugin;
 import org.neuroph.imgrec.ImageSizeMismatchException;
@@ -25,11 +21,12 @@ public class Brain {
 	public void train(boolean verbose) {
 
 		// This method might to something, if we want to do incremental training
-
 		// learn the training set
 		// this.network.learn(trainingSet);
 	}
 
+	// gives an answer in form of HashMap, which number has which probability,
+	// when asked on certail number file
 	public HashMap<String, Double> ask(String filePath, boolean verbose)
 			throws ImageSizeMismatchException, IOException {
 		if(verbose) System.out.println("asking on file:"+filePath);
@@ -47,41 +44,9 @@ public class Brain {
 
 	}
 
+	// not used currently
 	public void sleepAt(String storePath, boolean verbose) {
 		network.save(storePath);
 	}
 
-	/*
-	public void interprete(HashMap<String, Double> result, boolean verbose) {
-
-		ValueComparator bvc = new ValueComparator(result);
-		TreeMap<String, Double> sortedResult = new TreeMap<String, Double>(bvc);
-		sortedResult.putAll(result);
-
-		if (verbose) {
-			System.out.println("Result: " + sortedResult);
-		}
-
-		Entry<String, Double> hit = sortedResult.firstEntry();
-
-		if (hit.getValue() > .9) {
-			System.out.println("It must be a '" + hit.getKey() + "' ("
-					+ hit.getValue() + ").");
-		} else if (hit.getValue() > .8) {
-			System.out.println("I'm quite sure it is a '" + hit.getKey() + "' ("
-					+ hit.getValue() + ").");
-		} else if (hit.getValue() > .5) {
-			System.out.println("I think it is a '" + hit.getKey() + "' ("
-					+ hit.getValue() + ").");
-		} else {
-			System.out.print("I could be a ");
-
-			for (String number : sortedResult.keySet()) {
-				System.out.print("'" + number + "' (" + sortedResult.get(number) + ")"
-						+ NL + "or maybe a ");
-			}
-			System.out.println("something else …");
-		}
-	}
-	*/
 }
